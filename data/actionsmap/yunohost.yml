@@ -1055,6 +1055,15 @@ tools:
     actions:
 
         ### tools_ldapinit()
+        yoloupgrade:
+            action_help: YunoHost upgrade to new Yunohost version (on jessie)
+            api: POST /yoloupgrade
+            configuration:
+                authenticate: all
+                authenticator: ldap-anonymous
+                lock: false
+                
+        ### tools_ldapinit()
         ldapinit:
             action_help: YunoHost LDAP initialization
             api: POST /ldap

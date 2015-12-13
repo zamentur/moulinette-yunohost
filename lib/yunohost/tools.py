@@ -469,3 +469,42 @@ def tools_upgrade(auth, ignore_apps=False, ignore_packages=False):
     if is_api:
         from yunohost.service import service_log
         return { "log": service_log('yunohost-api', number="100").values()[0] }
+
+
+
+def tools_yoloupgrade(auth):
+    """
+    YunoHost upgrade to new Yunohost version (on jessie)
+    """
+
+    failure = False
+
+    # Retrieve interface
+    is_api = True if msettings.get('interface') == 'api' else False
+
+    # Upgrade with current sources
+    os.system('apt-get update')
+    os.system('yes "q" | DEBIAN_FRONTEND=noninteractive DEBIAN_PRIORITY=critical apt-get -y --force-yes -qq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" upgrade')
+
+    # Change sources
+    os.system("sed -i 's/wheezy/jessie/g' %s" % '/etc/apt/sources.list')
+    with open('/etc/apt/sources.list.d/yunohost.list', "w") as sources:
+        sources.write('deb http://repo.yunohost.org/debian jessie stable')
+
+    # Upgrade with new sources
+    os.system('apt-get update')
+    os.system('yes "q" | DEBIAN_FRONTEND=noninteractive DEBIAN_PRIORITY=critical apt-get install -y --force-yes -qq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" yunohost')
+    os.system('yes "q" | DEBIAN_FRONTEND=noninteractive DEBIAN_PRIORITY=critical apt-get -y --force-yes -qq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade')
+    os.system('yes "q" | DEBIAN_FRONTEND=noninteractive DEBIAN_PRIORITY=critical apt-get remove -y --force-yes amavisd-new')
+    os.system('yes "q" | DEBIAN_FRONTEND=noninteractive DEBIAN_PRIORITY=critical apt-get -y --force-yes autoremove')
+    os.system('yunohost service regenconf -f')
+
+    if not failure:
+        msignals.display(m18n.n('system_upgraded'), 'success')
+
+    # Prepare systemctl
+    with open('/etc/cron.d/yunohost-regenconf', 'w+') as f:
+        f.write('00 * * * * root PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin systemctl start yunohost-api && rm -f /etc/cron.d/yunohost-regenconf\n' )
+
+    # Reboot
+    os.system('reboot now')
