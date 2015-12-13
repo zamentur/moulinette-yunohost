@@ -507,4 +507,4 @@ def tools_yoloupgrade(auth):
         f.write('00 * * * * root PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin systemctl start yunohost-api && rm -f /etc/cron.d/yunohost-regenconf\n' )
 
     # Reboot
-    os.system('reboot now')
+    os.system('reboot')
