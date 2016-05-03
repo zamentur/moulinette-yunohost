@@ -497,7 +497,7 @@ def tools_yoloupgrade(auth):
     os.system('yes "q" | DEBIAN_FRONTEND=noninteractive DEBIAN_PRIORITY=critical apt-get -y --force-yes -qq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade')
     os.system('yes "q" | DEBIAN_FRONTEND=noninteractive DEBIAN_PRIORITY=critical apt-get remove -y --force-yes amavisd-new')
     os.system('yes "q" | DEBIAN_FRONTEND=noninteractive DEBIAN_PRIORITY=critical apt-get -y --force-yes autoremove')
-    os.system('yunohost service regenconf -f')
+    os.system('yunohost service regen-conf -f')
 
     if not failure:
         msignals.display(m18n.n('system_upgraded'), 'success')
